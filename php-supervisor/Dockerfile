@@ -3,7 +3,10 @@ FROM bravist/php-cli-alpine-app:1.0
 MAINTAINER bravist <chenghuiyong1987@gmail.com>
 
 # install supervisord
-RUN apk add supervisor \
+
+RUN apk update \
+	&& apk upgrade \
+	&& apk add supervisor \
 	&& rm -rf /var/cache/apk/*
 
 COPY ./supervisor/ /etc/supervisor/conf.d/
