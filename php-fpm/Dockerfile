@@ -1,67 +1,23 @@
-#https://store.docker.com/images/9c2c5426-0cca-4a30-a450-b2961541c6dc?tab=description
+# https://github.com/jorge07/alpine-php
 
-FROM php:7.1-fpm
+FROM bravist/php-cli-alpine-app:1.0
 
 MAINTAINER bravist <chenghuiyong1987@gmail.com>
 
+# https://pkgs.alpinelinux.org/packages
 
-# https://hub.docker.com/r/phpdocker/phpdocker/~/dockerfile/
+# Mirror mirror switch to Ali-OSM (Alibaba Open Source Mirror Site) - http://mirrors.aliyun.com/
+# RUN echo 'http://mirrors.aliyun.com/alpine/latest-stable/main' >> /etc/apk/repositories \
+#	&& echo 'http://mirrors.aliyun.com/alpine/latest-stable/community' >> /etc/apk/repositories
 
-# images
-RUN apt-get update \
-	&& apt-get install -y \
-	apt-utils \
-	wget \
-	libfreetype6-dev \
-	libjpeg62-turbo-dev \
-	libpng12-dev \
-	libgd-dev \
-	&& docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
-	&& docker-php-ext-install \
-		gd \
-		exif
+# Mirror mirror switch to Alpine Linux - http://dl-4.alpinelinux.org/alpine/
+RUN apk update \
+	&& apk upgrade \
+	&& apk add \
+		php7-fpm@community \
 
-# xml
-RUN apt-get update \
-	&& apt-get install -y \
-	libxml2-dev \
-	libxslt-dev \
-	&& docker-php-ext-install \
-		dom \
-		xmlrpc \
-		xsl
+	 && rm -rf /var/cache/apk/* 
 
-# database
-RUN docker-php-ext-install \
-	mysqli \
-	pdo \
-	pdo_mysql
+CMD ["/usr/sbin/php-fpm7", "-R", "--nodaemonize"]
 
-# compression
-RUN apt-get update \
-	&& apt-get install -y \
-	libbz2-dev \
-	zlib1g-dev \
-	&& docker-php-ext-install \
-		zip \
-		bz2
-
-# others
-RUN docker-php-ext-install \
-	mbstring \
-	json \
-	bcmath
-
-# composer
-RUN curl -sS https://getcomposer.org/installer | \
-    php -- --install-dir=/usr/bin/ --filename=composer
-
-
-WORKDIR /usr/share/nginx/html
-
-# 建立 php-fpm 用户
-#RUN useradd -r -g root www-data
-
-#USER php-fpm
-
-CMD ["php-fpm"]
+EXPOSE 9000
