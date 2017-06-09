@@ -14,7 +14,7 @@ MAINTAINER bravist <chenghuiyong1987@gmail.com>
 RUN apk update \
 	&& apk upgrade \
 	&& apk add \
-		php7-fpm@community \
+		php7-fpm \
 
 	 && rm -rf /var/cache/apk/* 
 
