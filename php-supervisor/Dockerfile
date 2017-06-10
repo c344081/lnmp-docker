@@ -1,8 +1,6 @@
-FROM bravist/php-cli-alpine-app:1.0
+FROM bravist/php-cli-alpine-aliyun-app:1.0
 
 MAINTAINER bravist <chenghuiyong1987@gmail.com>
-
-# install supervisord
 
 RUN apk update \
 	&& apk upgrade \
@@ -17,4 +15,4 @@ VOLUME ["/etc/supervisor/conf.d", "/var/log/supervisor/"]
 # Define working directory.
 WORKDIR /etc/supervisor/conf.d
 
-ENTRYPOINT ["supervisord", "--nodaemon", "--configuration", "/etc/supervisor/supervisord.conf"]
+CMD ["supervisord", "--nodaemon", "--configuration", "/etc/supervisor/conf.d/supervisord.conf"]
