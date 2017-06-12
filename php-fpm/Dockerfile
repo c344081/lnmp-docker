@@ -48,6 +48,3 @@ VOLUME /usr/share/nginx/html
 EXPOSE 9000
 
 CMD ["/usr/sbin/php-fpm7", "-R", "--nodaemonize"]
-
-
->>>>>>> master
