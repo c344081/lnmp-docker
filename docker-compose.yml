@@ -20,6 +20,7 @@ services:
     container_name: lnmp-logger-crond
     volumes:
       - ../nginx/logs:/var/log/nginx
+      - ./logs:/var/log/cron
     links:
       - php-fpm:php-fpm
   # PHP-FPM

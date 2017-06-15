@@ -15,8 +15,12 @@ RUN apk update \
 
 COPY ./nginx /etc/logrotate.d/nginx
 
+VOLUME /var/log/cron
+
+RUN chmod 644 /etc/logrotate.d/nginx
+
 RUN echo "0       2       *       *       *       /usr/sbin/logrotate -f /etc/logrotate.d/nginx"  >> /var/spool/cron/crontabs/root
 
 EXPOSE 80
 
-CMD ["/usr/sbin/crond", "-f"]
+CMD ["/usr/sbin/crond", "-f", "-L", "/var/log/cron/cron.log"]
