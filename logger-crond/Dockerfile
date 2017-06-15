@@ -17,6 +17,8 @@ COPY ./nginx /etc/logrotate.d/nginx
 
 VOLUME /var/log/cron
 
+VOLUME /var/log/nginx
+
 RUN chmod 644 /etc/logrotate.d/nginx
 
 RUN echo "0       2       *       *       *       /usr/sbin/logrotate -f /etc/logrotate.d/nginx"  >> /var/spool/cron/crontabs/root
