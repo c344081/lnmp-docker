@@ -8,10 +8,9 @@ services:
       - "80:80"
       - "443:443"
     #source code container
-    volumes_from:
-      - www
     volumes:
       - nginx-logs:/var/log/nginx
+      - www
     links:
       - php-fpm:php-fpm
     networks:
@@ -26,11 +25,9 @@ services:
     container_name: lnmp-php-fpm
     ports:
       - "9000:9000"
-      #source code container
-    volumes_from:
-      - www
     volumes: 
       - nginx-logs-php-fpm:/usr/local/var/log/php7
+      - www
     links:
       - mariadb
       - redis
@@ -54,10 +51,7 @@ services:
     build: ./php-supervisor
     container_name: lnmp-php-supervisor
     volumes:
-      - ./php-supervisor/supervisor/log:/var/log/supervisor
-      - ./php-supervisor/supervisor:/etc/supervisor/conf.d
-    volumes_from:
-       - www
+      - www
     links:
       - mariadb
       - redis
@@ -79,7 +73,7 @@ services:
   call-websocket:
     build: ./call-websocket
     container_name: lnmp-call-websocket
-    volumes_from:
+    volumes:
       - www
     ports:
       - "8190:8190"
@@ -94,7 +88,7 @@ services:
   laravel-qrcode-websocket:
     build: ./laravel-qrcode-websocket
     container_name: lnmp-laravel-qrcode-websocket
-    volumes_from:
+    volumes:
       - www
     ports:
       - "8192:8192"
@@ -109,7 +103,7 @@ services:
   php-crond:
     build: ./php-crond
     container_name: lnmp-php-crond
-    volumes_from:
+    volumes:
       - "www"
     networks:
       - overlay
@@ -125,7 +119,6 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      # NOTE: your data will be stored in ./mysql
       - mariadb-data:/var/lib/mysql
     environment:
       - MYSQL_DATABASE=mysql
