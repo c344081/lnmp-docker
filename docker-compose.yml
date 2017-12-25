@@ -11,7 +11,7 @@ services:
     volumes_from:
       - www
     volumes:
-      - "./nginx/logs:/var/log/nginx"
+      - nginx-logs:/var/log/nginx
     links:
       - php-fpm:php-fpm
     networks:
@@ -30,7 +30,7 @@ services:
     volumes_from:
       - www
     volumes: 
-      - "./nginx/logs/php-fpm:/usr/local/var/log/php7"
+      - nginx-logs-php-fpm:/usr/local/var/log/php7
     links:
       - mariadb
       - redis
@@ -111,8 +111,6 @@ services:
     container_name: lnmp-php-crond
     volumes_from:
       - "www"
-    volumes:
-      - "./php-crond/crontabs:/var/log/cron"
     networks:
       - overlay
     deploy:
@@ -128,7 +126,7 @@ services:
       - "3306:3306"
     volumes:
       # NOTE: your data will be stored in ./mysql
-      - ./mariadb/data/mysql:/var/lib/mysql
+      - mariadb-data:/var/lib/mysql
     environment:
       - MYSQL_DATABASE=mysql
       - MYSQL_USER=developer
@@ -147,7 +145,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - "./redis/data:/data"
+      - redis-data:/data
     environment:
       - REDIS_PASSWORD=developer
     networks:
@@ -161,8 +159,16 @@ services:
     image: tianon/true
     container_name: lnmp-www
     volumes:
-      - ./www:/usr/share/nginx/html
+      - www:/usr/share/nginx/html
 
 ### Networks Setup ############################################
 networks:
   overlay:
+
+### Volumes Setup ############################################
+volumes:
+  nginx-logs:
+  nginx-logs-php-fpm:
+  www:
+  redis-data:
+  mariadb-data:
