@@ -1,4 +1,4 @@
-version: '2.1'
+version: '3'
 services:
   ### Nginx Web Container #######################################
   nginx:
@@ -15,8 +15,10 @@ services:
     links:
       - php-fpm:php-fpm
     networks:
-      web_server_network:
-        ipv4_address: ${NGINX_WEB_SERVER_IP}
+     - overlay
+    deploy:
+      mode: replicated
+      replicas: 3
 
   ### PHP-FPM Container #######################################
   php-fpm:
@@ -42,7 +44,10 @@ services:
     env_file:
       - .env
     networks:
-      - web_server_network
+      - overlay
+    deploy:
+      placement:
+        constraints: [node.role == manager]
 
   ### PHP-SUPERVISOR Container #######################################
   php-supervisor:
@@ -65,7 +70,10 @@ services:
     env_file:
       - .env
     networks:
-      - web_server_network
+      - overlay
+    deploy:
+      placement:
+        constraints: [node.role == manager]
 
   ### CALL-WEBSOCKET Container #######################################
   call-websocket:
@@ -77,7 +85,10 @@ services:
       - "8190:8190"
       - "8191:8191"
     networks:
-      - web_server_network
+      - overlay
+    deploy:
+      placement:
+        constraints: [node.role == manager]
 
   ### Laravel QrCode WebSocket Container #######################################
   laravel-qrcode-websocket:
@@ -89,7 +100,10 @@ services:
       - "8192:8192"
       - "8193:8193"
     networks:
-      - web_server_network
+      - overlay
+    deploy:
+      placement:
+        constraints: [node.role == manager]
 
   ### PHP-CROND Container #######################################
   php-crond:
@@ -100,7 +114,10 @@ services:
     volumes:
       - "./php-crond/crontabs:/var/log/cron"
     networks:
-      - web_server_network
+      - overlay
+    deploy:
+      placement:
+        constraints: [node.role == manager]
 
   ### MariaDB Container #######################################
   # MariaDB - One of the most popular database servers. Made by the original developers of MySQL. Guaranteed to stay open source.
@@ -118,7 +135,10 @@ services:
       - MYSQL_PASSWORD=developer
       - MYSQL_ROOT_PASSWORD=developer
     networks:
-      - web_server_network
+      - overlay
+    deploy:
+      placement:
+        constraints: [node.role == manager]
 
   ### REDIS Container #######################################
   redis:
@@ -131,17 +151,10 @@ services:
     environment:
       - REDIS_PASSWORD=developer
     networks:
-      - web_server_network
-
-
-  ### MongoDB Container #######################################
-  # mongo:
-  #   image: mongo:3.4
-  #   container_name: lnmp-mongo
-  #   volumes:
-  #     - "./mongo:/data/db"
-  #   ports:
-  #     - "27017:27017"
+      - overlay
+    deploy:
+      placement:
+        constraints: [node.role == manager]
 
   ### Web-Root Container #######################################
   www:
@@ -152,10 +165,4 @@ services:
 
 ### Networks Setup ############################################
 networks:
-  web_server_network:
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-      - subnet: "${WEB_SERVER_SUBNET}"
-        gateway: "${WEB_SERVER_GATEWAY}"
+  overlay:
