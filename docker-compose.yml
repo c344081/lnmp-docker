@@ -1,37 +1,36 @@
-version: '3'
+version: '3.4'
 services:
   ### Nginx Web Container #######################################
   nginx:
-    build: ./nginx
-    container_name: lnmp-nginx
+    image: nginx:1.13.1-alpine
     ports:
       - "80:80"
       - "443:443"
     #source code container
     volumes:
-      - nginx-logs:/var/log/nginx
-      - www
-    links:
+      - ./www:/usr/share/nginx/html
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d/
+      - ./nginx/cert:/etc/nginx/cert/
+    depends_on:
       - php-fpm:php-fpm
     networks:
      - overlay
     deploy:
       mode: replicated
-      replicas: 3
+      replicas: 1
 
   ### PHP-FPM Container #######################################
   php-fpm:
     image: bravist/php-fpm-alpine-aliyun-app:1.14
-    container_name: lnmp-php-fpm
     ports:
       - "9000:9000"
     volumes: 
-      - nginx-logs-php-fpm:/usr/local/var/log/php7
-      - www
-    links:
+      - ./www:/usr/share/nginx/html
+    networks:
+      - overlay
+    depends_on:
       - mariadb
-      - redis
-    #https://github.com/laradock/laradock/issues/435
     extra_hosts:
       - "${PHP_FPM_DOMAIN}:${NGINX_WEB_SERVER_IP}"
       - "${PHP_FPM_DOMAIN2}:${NGINX_WEB_SERVER_IP}"
@@ -40,86 +39,19 @@ services:
       - "${PHP_FPM_DOMAIN5}:${NGINX_WEB_SERVER_IP}"
     env_file:
       - .env
-    networks:
-      - overlay
     deploy:
       placement:
         constraints: [node.role == manager]
 
-  ### PHP-SUPERVISOR Container #######################################
-  php-supervisor:
-    build: ./php-supervisor
-    container_name: lnmp-php-supervisor
-    volumes:
-      - www
-    links:
-      - mariadb
-      - redis
-    extra_hosts:
-      - "${SUPERVISOR_DOMAIN}:${NGINX_WEB_SERVER_IP}"
-      - "${SUPERVISOR_DOMAIN2}:${NGINX_WEB_SERVER_IP}"
-      - "${SUPERVISOR_DOMAIN3}:${NGINX_WEB_SERVER_IP}"
-      - "${SUPERVISOR_DOMAIN4}:${NGINX_WEB_SERVER_IP}"
-      - "${SUPERVISOR_DOMAIN5}:${NGINX_WEB_SERVER_IP}"
-    env_file:
-      - .env
-    networks:
-      - overlay
-    deploy:
-      placement:
-        constraints: [node.role == manager]
-
-  ### CALL-WEBSOCKET Container #######################################
-  call-websocket:
-    build: ./call-websocket
-    container_name: lnmp-call-websocket
-    volumes:
-      - www
-    ports:
-      - "8190:8190"
-      - "8191:8191"
-    networks:
-      - overlay
-    deploy:
-      placement:
-        constraints: [node.role == manager]
-
-  ### Laravel QrCode WebSocket Container #######################################
-  laravel-qrcode-websocket:
-    build: ./laravel-qrcode-websocket
-    container_name: lnmp-laravel-qrcode-websocket
-    volumes:
-      - www
-    ports:
-      - "8192:8192"
-      - "8193:8193"
-    networks:
-      - overlay
-    deploy:
-      placement:
-        constraints: [node.role == manager]
-
-  ### PHP-CROND Container #######################################
-  php-crond:
-    build: ./php-crond
-    container_name: lnmp-php-crond
-    volumes:
-      - "www"
-    networks:
-      - overlay
-    deploy:
-      placement:
-        constraints: [node.role == manager]
 
   ### MariaDB Container #######################################
   # MariaDB - One of the most popular database servers. Made by the original developers of MySQL. Guaranteed to stay open source.
   mariadb:
     image: mariadb:10.2
-    container_name: lnmp-mariadb
     ports:
       - "3306:3306"
     volumes:
-      - mariadb-data:/var/lib/mysql
+      - ./mariadb/data/mysql:/var/lib/mysql
     environment:
       - MYSQL_DATABASE=mysql
       - MYSQL_USER=developer
@@ -131,37 +63,6 @@ services:
       placement:
         constraints: [node.role == manager]
 
-  ### REDIS Container #######################################
-  redis:
-    build: ./redis
-    container_name: lnmp-redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
-    environment:
-      - REDIS_PASSWORD=developer
-    networks:
-      - overlay
-    deploy:
-      placement:
-        constraints: [node.role == manager]
-
-  ### Web-Root Container #######################################
-  www:
-    image: tianon/true
-    container_name: lnmp-www
-    volumes:
-      - www:/usr/share/nginx/html
-
 ### Networks Setup ############################################
 networks:
   overlay:
-
-### Volumes Setup ############################################
-volumes:
-  nginx-logs:
-  nginx-logs-php-fpm:
-  www:
-  redis-data:
-  mariadb-data:
